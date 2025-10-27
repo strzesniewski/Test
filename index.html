@@ -1,4 +1,4 @@
-<html>
+inni<html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
@@ -61,10 +61,11 @@ while(aktualne_pole!=plansza.length){
       }
    }
   document.querySelector('.results').innerText+=`Krok:${krok} Bank: ${bank} Aktualne Pole: ${aktualne_pole}\n`;
-}
-        if(krok === 2000){
+if(krok > 2000){
           break;
         }
+}
+        
   }
       let Czysc = () => {
         document.querySelector('.results').innerText ="";
