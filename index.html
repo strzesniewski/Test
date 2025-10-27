@@ -62,6 +62,9 @@ while(aktualne_pole!=plansza.length){
    }
   document.querySelector('.results').innerText+=`Krok:${krok} Bank: ${bank} Aktualne Pole: ${aktualne_pole}\n`;
 }
+        if(krok === 2000){
+          break;
+        }
   }
       let Czysc = () => {
         document.querySelector('.results').innerText ="";
