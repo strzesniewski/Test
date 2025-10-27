@@ -19,6 +19,7 @@ let cofniecia4 = [0,0,0,0,0,3,0,1,0];
 let plansza5 = [0,125,-625,0,25,-125,0,5,-25,0,1,-5,0];
 let cofniecia5 = [0,0,1,0,0,1,0,0,1,0,0,1,0];
 
+
 let Oblicz= (plansza, cofniecia)=> {
 
 let bank = 0;
@@ -32,6 +33,17 @@ while(aktualne_pole!=plansza.length){
     bank+=zdobycz;
     aktualne_pole++;
    }else{
+      if(bank>=(zdobycz*-1)){
+         bank+=zdobycz;
+        aktualne_pole++
+      }else{
+        aktualne_pole=cofniecia[aktualne_pole-1]
+      }
+   }
+  document.querySelector('.results').innerText+=`Krok:${krok} Bank: ${bank} Aktualne Pole: ${aktualne_pole}\n`;
+}
+  }
+document.querySelector('.start').addEventListener('click',Oblicz(plansza1,cofniecia1));
     </script>
   </body>
 </html>
