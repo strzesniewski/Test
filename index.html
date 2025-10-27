@@ -3,10 +3,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
-    wersja3
+    wersja4
+    <select placeholder="Zadanie" name="zadanie">
+      <option value="1">Zadanie 1</option>
+      <option value="2">Zadanie 2</option>
+      <option value="3">Zadanie 3</option>
+      <option value="4">Zadanie 4</option>
+      <option value="5">Zadanie 5</option>
+    </select>
+    <input type="number" name="utrudnienie" value="10"/>
+    <button class="czysc">Czyść</button>
     <button class="start">Oblicz</button>
 <div class="results"></div>
     <script>
+      let Oblicz= ()=> {
+
+        let utrudnienie = document.querySelector('input').value;
       let plansza1 = [0,1,0,-3,0,1,0,1,0];
 let cofniecia1 = [0,0,0,1,0,0,0,0,0];
 
@@ -16,14 +28,19 @@ let cofniecia2 = [0,0,0,0,2,0,0,0,6,0];
 let plansza3 = [0,9,0,1,0,-20,0,12,0,-13,0];
 let cofniecia3 = [0,0,0,0,0,1,0,0,0,3,0];
 
-let plansza4 = [0,1,0,10,0,-50,0,-5,0];
+let plansza4 = [0,1,0,utrudnienie,0,-50,0,-5,0];
 let cofniecia4 = [0,0,0,0,0,3,0,1,0];
 
 let plansza5 = [0,125,-625,0,25,-125,0,5,-25,0,1,-5,0];
 let cofniecia5 = [0,0,1,0,0,1,0,0,1,0,0,1,0];
 
+      let plansze=[plansza1,plansza2,plansza3,plansza4,plansza5];
+let cofnieciaArr=[cofniecia1,cofniecia2,cofniecia3,cofniecia4,cofniecia5];
 
-let Oblicz= (plansza, cofniecia)=> {
+
+  let wybor = document.querySelector('select').value;
+  let plansza = plansze[wybor-1];
+  let cifniecia = cofnieciaArr[wybor-1];
 
 let bank = 0;
 let krok = 0;
@@ -46,7 +63,11 @@ while(aktualne_pole!=plansza.length){
   document.querySelector('.results').innerText+=`Krok:${krok} Bank: ${bank} Aktualne Pole: ${aktualne_pole}\n`;
 }
   }
-document.querySelector('.start').addEventListener('click',Oblicz(plansza1,cofniecia1));
+      let Czysc = () => {
+        document.querySelector('.results').innerText ="";
+      }
+document.querySelector('.start').addEventListener('click',Oblicz);
+      document.querySelector('.czysc').addEventListener('click',Czysc);
     </script>
   </body>
 </html>
