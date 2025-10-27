@@ -143,44 +143,4 @@
       document.querySelector('.czysc').addEventListener('click', Czysc);
     </script>
   </body>
-</html>      let plansze=[plansza1,plansza2,plansza3,plansza4,plansza5];
-let cofnieciaArr=[cofniecia1,cofniecia2,cofniecia3,cofniecia4,cofniecia5];
-
-
-  let wybor = document.querySelector('select').value;
-  let plansza = plansze[wybor-1];
-  let cofniecia = cofnieciaArr[wybor-1];
-
-let bank = 0;
-let krok = 0;
-let aktualne_pole = 1;
-
-while(aktualne_pole!=plansza.length){
-  krok++;
-  let zdobycz = plansza[aktualne_pole-1];
-  if(zdobycz>=0){
-    bank+=zdobycz;
-    aktualne_pole++;
-   }else{
-      if(bank>=(zdobycz*-1)){
-         bank+=zdobycz;
-        aktualne_pole++
-      }else{
-        aktualne_pole=cofniecia[aktualne_pole-1]
-      }
-   }
-  document.querySelector('.results').innerText+=`Krok:${krok} Bank: ${bank} Aktualne Pole: ${aktualne_pole}\n`;
-if(krok > 2000){
-          break;
-        }
-}
-        
-  }
-      let Czysc = () => {
-        document.querySelector('.results').innerText ="";
-      }
-document.querySelector('.start').addEventListener('click',Oblicz);
-      document.querySelector('.czysc').addEventListener('click',Czysc);
-    </script>
-  </body>
-</html>
+</html>      
