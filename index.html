@@ -1,40 +1,149 @@
-inni<html>
+<!doctype html>
+<html lang="pl">
   <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Symulacja</title>
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 1rem; }
+      .controls { margin-bottom: 1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+      .results { white-space: pre-wrap; font-family: monospace; background:#f6f8fa; padding:10px; border-radius:6px; max-height:40vh; overflow:auto; }
+      button[disabled] { opacity: 0.6; cursor: not-allowed; }
+    </style>
   </head>
   <body>
-    wersja4
-    <select placeholder="Zadanie" name="zadanie">
-      <option value="1">Zadanie 1</option>
-      <option value="2">Zadanie 2</option>
-      <option value="3">Zadanie 3</option>
-      <option value="4">Zadanie 4</option>
-      <option value="5">Zadanie 5</option>
-    </select>
-    <input type="number" name="utrudnienie" value="10"/>
-    <button class="czysc">Czyść</button>
-    <button class="start">Oblicz</button>
-<div class="results"></div>
+    <div class="controls">
+      <label>
+        Zadanie:
+        <select name="zadanie">
+          <option value="1">Zadanie 1</option>
+          <option value="2">Zadanie 2</option>
+          <option value="3">Zadanie 3</option>
+          <option value="4" selected>Zadanie 4</option>
+          <option value="5">Zadanie 5</option>
+        </select>
+      </label>
+
+      <label>
+        Utrudnienie:
+        <input type="number" name="utrudnienie" value="10" />
+      </label>
+
+      <button class="czysc">Czyść</button>
+      <button class="start">Oblicz</button>
+    </div>
+
+    <pre class="results" aria-live="polite"></pre>
+
     <script>
-      let Oblicz= ()=> {
+      // Pomocnicza funkcja odblokowująca pętlę UI
+      const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-        let utrudnienie = document.querySelector('input').value;
-      let plansza1 = [0,1,0,-3,0,1,0,1,0];
-let cofniecia1 = [0,0,0,1,0,0,0,0,0];
+      async function Oblicz() {
+        const resultsEl = document.querySelector('.results');
+        const startBtn = document.querySelector('.start');
+        const czyscBtn = document.querySelector('.czysc');
+        // zablokuj przyciski podczas obliczeń
+        startBtn.disabled = true;
+        czyscBtn.disabled = true;
 
-let plansza2 = [0,0,6,0,-11,0,3,0,-10,0];
-let cofniecia2 = [0,0,0,0,2,0,0,0,6,0];
+        // odczyt wartości
+        const utrudnienieInput = document.querySelector('input[name="utrudnienie"]');
+        let utrudnienie = Number(utrudnienieInput.value);
+        if (!Number.isFinite(utrudnienie)) utrudnienie = 0;
 
-let plansza3 = [0,9,0,1,0,-20,0,12,0,-13,0];
-let cofniecia3 = [0,0,0,0,0,1,0,0,0,3,0];
+        // plany i cofnięcia (jak w oryginale)
+        const plansza1 = [0,1,0,-3,0,1,0,1,0];
+        const cofniecia1 = [0,0,0,1,0,0,0,0,0];
 
-let plansza4 = [0,1,0,utrudnienie,0,-50,0,-5,0];
-let cofniecia4 = [0,0,0,0,0,3,0,1,0];
+        const plansza2 = [0,0,6,0,-11,0,3,0,-10,0];
+        const cofniecia2 = [0,0,0,0,2,0,0,0,6,0];
 
-let plansza5 = [0,125,-625,0,25,-125,0,5,-25,0,1,-5,0];
-let cofniecia5 = [0,0,1,0,0,1,0,0,1,0,0,1,0];
+        const plansza3 = [0,9,0,1,0,-20,0,12,0,-13,0];
+        const cofniecia3 = [0,0,0,0,0,1,0,0,0,3,0];
 
-      let plansze=[plansza1,plansza2,plansza3,plansza4,plansza5];
+        const plansza4 = [0,1,0,utrudnienie,0,-50,0,-5,0];
+        const cofniecia4 = [0,0,0,0,0,3,0,1,0];
+
+        const plansza5 = [0,125,-625,0,25,-125,0,5,-25,0,1,-5,0];
+        const cofniecia5 = [0,0,1,0,0,1,0,0,1,0,0,1,0];
+
+        const plansze = [plansza1, plansza2, plansza3, plansza4, plansza5];
+        const cofnieciaArr = [cofniecia1, cofniecia2, cofniecia3, cofniecia4, cofniecia5];
+
+        const wybor = Number(document.querySelector('select[name="zadanie"]').value) || 1;
+        const plansza = plansze[wybor - 1];
+        const cofniecia = cofnieciaArr[wybor - 1];
+
+        // parametry bezpieczeństwa
+        const MAX_STEPS = 100000;
+        const STEP_DELAY_MS = 0; // jak chcesz wolniej - ustaw np. 10
+
+        // reset wyników i przygotowanie wykrywania cykli
+        resultsEl.textContent = '';
+        let bank = 0;
+        let krok = 0;
+        let aktualne_pole = 1;
+        // Aby wykryć cykl: zapamiętujemy pary (aktualne_pole, bank)
+        const visited = new Set();
+
+        while (aktualne_pole != plansza.length) {
+          krok++;
+          // wykrycie zbyt wielu kroków
+          if (krok > MAX_STEPS) {
+            resultsEl.textContent += `Przerwano: osiągnięto limit kroków (${MAX_STEPS}). Możliwe zapętlenie lub zbyt długa symulacja.\n`;
+            break;
+          }
+
+          // wykrycie cyklu stanu (pole + stan banku)
+          const stateKey = `${aktualne_pole}:${bank}`;
+          if (visited.has(stateKey)) {
+            resultsEl.textContent += `Przerwano: wykryto powtarzający się stan (cykl) - pole=${aktualne_pole} bank=${bank}.\n`;
+            break;
+          }
+          visited.add(stateKey);
+
+          const zdobycz = plansza[aktualne_pole - 1];
+          if (zdobycz >= 0) {
+            bank += zdobycz;
+            aktualne_pole++;
+          } else {
+            if (bank >= (Math.abs(zdobycz))) {
+              bank += zdobycz; // zdobycze ujemne odejmują
+              aktualne_pole++;
+            } else {
+              aktualne_pole = cofniecia[aktualne_pole - 1];
+            }
+          }
+
+          // dopisanie pojedynczego kroku do wyników (linia po linii)
+          resultsEl.textContent += `Krok: ${krok}  Bank: ${bank}  AktualnePole: ${aktualne_pole}\n`;
+          // przewiń na sam dół
+          resultsEl.scrollTop = resultsEl.scrollHeight;
+
+          // pozwól UI się zaktualizować i innym zdarzeniom wykonać
+          if (STEP_DELAY_MS > 0) {
+            await sleep(STEP_DELAY_MS);
+          } else {
+            // jeśli 0, nadal daj szansę event loopowi
+            await sleep(0);
+          }
+        }
+
+        // odblokuj przyciski
+        startBtn.disabled = false;
+        czyscBtn.disabled = false;
+      }
+
+      function Czysc() {
+        document.querySelector('.results').textContent = "";
+      }
+
+      document.querySelector('.start').addEventListener('click', Oblicz);
+      document.querySelector('.czysc').addEventListener('click', Czysc);
+    </script>
+  </body>
+</html>      let plansze=[plansza1,plansza2,plansza3,plansza4,plansza5];
 let cofnieciaArr=[cofniecia1,cofniecia2,cofniecia3,cofniecia4,cofniecia5];
 
 
